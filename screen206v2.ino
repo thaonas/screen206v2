@@ -1,6 +1,7 @@
 #include <arduino.h>
 #include <Wire.h>
 #include <LittleFS.h>
+#include "EEPROM_SafeManager.h"
 #include <U8g2lib.h>            // Bibliothèque Ecran Oled
 #include <Adafruit_GFX.h>       // Bibliothèque Ecran Oled 2                                         
 #include <Adafruit_SSD1306.h>   // Bibliothèque Ecran Oled 2
@@ -15,6 +16,8 @@
 #include "Image.h"              // Fichier Image en BITMAP
 #include "Bot.h"                // Fichier Image en BITMAP
 #include "meteo.h"              // Fichier Image en BITMAP
+
+EEPROM_SafeManager eepromManager;
 
 // ---- OLED 1 (3.12 inches, 256x64, SSD1322) ----
 U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 15, /* dc=*/ 16, /* reset=*/ 17);
@@ -182,6 +185,11 @@ void setup(){
 
   Serial.begin(115200);  // ---- Initialise la communication série ----
   Serial.println("Démarrage du programme...");
+  
+  eepromManager.begin();
+
+  Serial.print("Brightness sauvegardée : ");
+  Serial.println(eepromManager.data.brightness);
       
   Wire.begin();  // ---- Initialize I2C communication ----
 
@@ -527,6 +535,27 @@ void saveSettingsToLittleFS() {
   //file.println(String(setThresholdbreak));
 
   file.close();
+}
+
+void showDiagnostic() {
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+
+  display.println("=== Diagnostic ===");
+
+  esp_reset_reason_t reason = esp_reset_reason();
+  display.print("Reset: ");
+  display.println((int)reason);
+
+  display.print("Free heap: ");
+  display.println(ESP.getFreeHeap());
+
+  display.print("Brightness: ");
+  display.println(eepromManager.data.brightness);
+
+  display.display();
 }
 
 void miseenpage() {
