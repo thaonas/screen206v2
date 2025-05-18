@@ -368,6 +368,7 @@ if (!LittleFS.begin(true)) {
   ///////////////////////////////////////////////////////////////////////////////////
     adjustVarTime();
     adjustVarDate();
+    adjustchronotime();
   delay(400); 
 
 // ---- Initialisation du Chronometre ----
@@ -381,6 +382,7 @@ if (!LittleFS.begin(true)) {
   display2.print("Chronometre");                 
   display2.display();
     chronometre206 = Chrono(Chrono::MILLIS, false);    // Ne pas démarrer le chronomètre automatiquement
+    chronometre206.elapsed(eepromManager.data.savedChronoTime);
   delay(350); 
 
 // ---- Initialisation Terminé ----
@@ -1280,6 +1282,11 @@ void functionButton2() {
     Serial.println("Bouton 2 pressé");
   if (chronometre206.isRunning()) {
     chronometre206.stop(); // Arrêter le chronomètre
+        
+    // 🔸 Sauvegarde l'état du chrono à l'arrêt
+    eepromManager.data.savedChronoTime = chronometre206.elapsed();
+    eepromManager.data.chronoWasRunning = false;  // si tu veux ce champ
+    eepromManager.save();
   } else {
     chronometre206.resume(); // Démarrer ou reprendre le chronomètre
   }
@@ -1297,6 +1304,11 @@ void resetChrono() {
   if (!chronometre206.isRunning()) { // Si le chronomètre est à l'arrêt
     chronometre206.restart(0);
     chronometre206 = Chrono(Chrono::MILLIS, false); // Réinitialise et stoppe le chronomètre
+
+    // 🔸 Sauvegarde à la remise à zéro
+    eepromManager.data.savedChronoTime = 0;
+    eepromManager.data.chronoWasRunning = false;
+    eepromManager.save();
   }
 }
 
