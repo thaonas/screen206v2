@@ -11,6 +11,8 @@ struct EEPROMData {
   uint32_t magic;
   uint32_t crc;
   int brightness;
+  uint32_t savedChronoTime;  // En millisecondes
+  bool chronoWasRunning; 
   // Ajoute ici d'autres champs à sauvegarder
 };
 
